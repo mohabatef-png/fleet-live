@@ -5,6 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <title>3PL Fleet Live &amp; Riders Data</title>
   <script>
+    // ── Private browser storage ────────────────────────────────
+    // This dashboard lives on the same domain (…github.io) as other dashboards, and the browser shares localStorage
+    // between all pages of one domain. So every key used here is stored under its own prefix: this dashboard never
+    // reads or overwrites another dashboard's data, and they never read or overwrite ours.
+    (function () {
+      try {
+        var P = 'fl3pl:', proto = Storage.prototype, get = proto.getItem, set = proto.setItem, del = proto.removeItem;
+        var mine = function (o) { try { return o === window.localStorage; } catch (e) { return false; } };
+        proto.getItem = function (k) { return get.call(this, mine(this) ? P + k : k); };
+        proto.setItem = function (k, v) { return set.call(this, mine(this) ? P + k : k, v); };
+        proto.removeItem = function (k) { return del.call(this, mine(this) ? P + k : k); };
+        del.call(window.localStorage, 'gasToken');   // an earlier version kept the admin token under an unprefixed (shared) key
+      } catch (e) {}
+    })();
+  </script>
+  <script>
     // ── Dashboard name ─────────────────────────────────────────
     // Default name: "3PL Fleet Live & Riders Data".
     // For a specific 3PL, set THREEPL_NAME (e.g. 'CompanyName') and every place the
@@ -407,6 +423,7 @@
     .sp-mafarik  { background: rgba(244,114,182,.15);  color: #f472b6; }
     .sp-nafora   { background: rgba(163,230,53,.15);   color: #a3e635; }
     .sp-na       { background: rgba(113,113,122,.12);  color: #71717a; }
+    .sp-multi    { background: rgba(45,212,191,.12);   color: #5eead4; }   /* rider matched to several starting points */
 
     .company-badge {
       display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px;
@@ -1071,6 +1088,7 @@
 
   function spClass(sp) {
     const s = (sp || '').toLowerCase();
+    if (s.indexOf(';') !== -1) return 'sp-multi';
     if (s.includes('laselky'))  return 'sp-laselky';
     if (s.includes('meraag'))   return 'sp-meraag';
     if (s.includes('mafarik'))  return 'sp-mafarik';
