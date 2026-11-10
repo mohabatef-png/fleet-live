@@ -1850,7 +1850,7 @@ try { localStorage.setItem('riderLastUpdated', ts + ' (from sync-riders-live)');
   // ── GAS Sync ──
   // Paste the NEW web-app URL (…/exec) of the secure backend (Code.gs) here after you deploy it.
   // Leave '' to run without a backend (local data only). The old public link was removed on purpose.
-  const GAS_URL = '';
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbyWTywfBiwuwr0ZyY6GyKURHZ9CHdyyUUpcn6vA6CKzlEjGfF6TUQgGfImQfoiAQofi/exec';
 
   // ── Access token ───────────────────────────────────────────
   // 3PL pages: the token comes from the link (?3pl=Name&t=TOKEN) and only allows reading that company.
@@ -1888,6 +1888,7 @@ try { localStorage.setItem('riderLastUpdated', ts + ' (from sync-riders-live)');
     } catch (e) { alert('Could not upload the headcount: ' + e.message); }
   }
 
+  let tokenDeclined = false;
   let accessProblem = '';
   let gasErrorShown = false;
   function gasToken(interactive) {
@@ -1895,9 +1896,9 @@ try { localStorage.setItem('riderLastUpdated', ts + ' (from sync-riders-live)');
       if (IS_3PL_VIEW) return (new URLSearchParams(location.search).get('t') || '').trim();
       let t = '';
       try { t = localStorage.getItem('gasToken') || ''; } catch (e) {}
-      if (!t && interactive) {
+      if (!t && interactive && !tokenDeclined) {
         t = (prompt('Enter the dashboard access token (from the Apps Script setup):') || '').trim();
-        if (t) { try { localStorage.setItem('gasToken', t); } catch (e) {} }
+        if (t) { try { localStorage.setItem('gasToken', t); } catch (e) {} } else { tokenDeclined = true; }   // ask only once per page load
       }
       return t;
     } catch (e) { return ''; }
