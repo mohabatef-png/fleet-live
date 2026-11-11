@@ -27,6 +27,9 @@
     // name shows becomes "3PL Fleet Live & Riders Data — CompanyName". For quick previews you
     // can also open the page with ?3pl=CompanyName.
     const THREEPL_NAME = '';
+    // Riders tab: hidden for now. Set this to true to bring it back - all of its code is still in this file.
+    const SHOW_RIDERS_TAB = false;
+    if (!SHOW_RIDERS_TAB) document.documentElement.classList.add('no-riders-tab');
     const THREEPL = (function () {
       let n = THREEPL_NAME;
       try { n = n || new URLSearchParams(location.search).get('3pl') || ''; } catch (e) {}
@@ -560,6 +563,7 @@
     /* ── Tabs ── */
     .tabbar { display:flex; gap:4px; padding:0 20px; background:#0c0c0e; border-bottom:1px solid #27272a; overflow-x:auto; }
     .tab-btn { background:none; border:none; color:#a1a1aa; font:600 13px 'Inter',sans-serif; padding:12px 16px; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
+    html.no-riders-tab #tabBar, html.no-riders-tab #ridersView { display: none !important; }
     .tab-btn:hover { color:#e4e4e7; }
     .tab-btn.active { color:#ff6b35; border-bottom-color:#ff6b35; }
     body.light .tabbar { background:#fff; border-bottom-color:#e4e4e7; }
@@ -1883,7 +1887,7 @@ try { localStorage.setItem('riderLastUpdated', ts + ' (from sync-riders-live)');
       const d = await res.json();
       if (d && d.error) { handleGasError(d.error); return false; }
       if (d && d.headcount) HEADCOUNT = d.headcount;
-      if (d && d.db && window.setRiderDB) window.setRiderDB(d.db);
+      if (d && d.db && window.setRiderDB && SHOW_RIDERS_TAB) window.setRiderDB(d.db);
       return !!(d && d.headcount);
     } catch (e) { return false; }
   }
@@ -2219,7 +2223,7 @@ try { localStorage.setItem('riderLastUpdated', ts + ' (from sync-riders-live)');
     render();
   }
   window.switchTab = function (tab) {
-    const riders = tab === 'riders';
+    const riders = tab === 'riders' && SHOW_RIDERS_TAB;
     $('liveView').style.display = riders ? 'none' : '';
     $('ridersView').style.display = riders ? '' : 'none';
     document.body.classList.toggle('tab-riders', riders);
